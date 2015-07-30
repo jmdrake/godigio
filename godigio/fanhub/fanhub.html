@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<!-- saved from url=(0047)http://testing.theoutershell.com/dashboard.html -->
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        <meta charset="utf-8">
+        <title>FanHub</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css" rel="stylesheet">
+
+        <!--[if lt IE 9]>
+<script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+        <link href="./fanhub_cameron_files/fanhub.css" rel="stylesheet">
+    </head>
+    <body>
+        <div class="wrapper">
+            <div class="box">
+                <div class="row row-offcanvas row-offcanvas-left">                                
+                    <!-- main right col -->
+                    <div class="column col-sm-12 col-xs-11" id="main">                
+                        <div id="navbar">                            
+                        </div>
+                        <div>
+                            <div class="col-sm-12">
+                                <div id="logo">                                    
+                                </div>
+                                <!-- content -->                      
+                                <div class="row">
+                                    <!-- main col left --> 
+                                    <div class="col-sm-5">
+                                        <!-- Profile Image Area -->
+                                        <div id="showprofile">                                            
+                                        </div>
+                                        <div id="postform" placeholder="Update your status" header="What's New">
+                                        </div>
+                                        <div id="videopanel">                                            
+                                        </div>
+                                        <div id="fanspanel">                                            
+                                        </div>
+                                        <div class="panel panel-default">
+                                            <div class="panel-heading" id="fansheader">
+                                            </div>
+                                            <div className="panel-body" id="fanslist">
+                                            </div>
+                                        </div>                                        
+                                        <div class="panel panel-default">
+                                            <div class="panel-heading" id="fanofheader">
+                                            </div>
+                                            <div className="panel-body" id="fanoflist">
+                                            </div>
+                                        </div>                                        
+                                    </div>
+                                    <!-- main col right -->
+                                    <div class="col-sm-7">
+                                        <!-- Note : timeline div is updated in postform.js -->
+                                        <div id="timeline">                                            
+                                        </div>                                        
+                                    </div>
+                                </div><!--/row-->
+
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <!-- <a href="#">Twitter</a> <small class="text-muted">|</small> <a href="#">Facebook</a> <small class="text-muted">|</small> <a href="#">Google+</a>-->
+                                    </div>
+                                </div>
+
+                                <div class="row" id="footer">    
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <h4 class="text-center">
+                                <!--<a href="http://bootply.com/96266" target="ext">Download this Template @Bootply</a>-->
+                            </h4>
+
+                            <hr>
+
+
+                        </div><!-- /col-9 -->
+                    </div><!-- /padding -->
+                </div>
+                <!-- /main -->
+
+            </div>
+        </div>
+
+        <!--post modal-->
+        <div id="postModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        </div>
+        <!-- Bootstrap core JavaScript
+================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="../js/jquery.min.js"></script>
+        <script src="../js/bootstrap.min.js"></script>
+        <script src="../js/pouchdb-3.6.0.min.js"></script>
+        <script src="../js/pouchdb.authentication.min.js"></script>
+        <script src="../build/react.js"></script>
+        <script src="../build/JSXTransformer.js"></script>
+        <script src="../js/blob-util.min.js"></script>
+        <script type="text/jsx" src="../react_components/navbar.js"></script>  
+        <script type="text/jsx" src="../react_components/showprofile.js"></script>  
+        <script type="text/jsx" src="../react_components/postform.js"></script>
+        <script type="text/jsx" src="../react_components/postmodal.js"></script>  
+        <script type="text/jsx" src="../react_components/photopanel.js"></script>
+        <script type="text/jsx" src="../react_components/videopanel.js"></script>
+        <script type="text/jsx" src="../react_components/imageframe.js"></script>
+        <script type="text/jsx" src="../react_components/fanspanel.js"></script>
+        <script type="text/jsx" src="../react_components/fanofpanel.js"></script>
+        <script type="text/jsx" src="../react_components/timeline.js"></script>
+        <script type="text/jsx" src="../react_components/footer.js"></script>  
+        <script type="text/jsx" src="../react_components/logo.js"></script>  
+        <script type="text/jsx" src="fanhub.js"></script>
+    </body>
+</html>

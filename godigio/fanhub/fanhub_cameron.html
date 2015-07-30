@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<!-- saved from url=(0047)http://testing.theoutershell.com/dashboard.html -->
+<html lang="en">
+    <head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <meta charset="utf-8">
+    <title>FanHub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <!--[if lt IE 9]>
+<script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+    <link href="./fanhub_cameron_files/fanhub.css" rel="stylesheet">
+    </head>
+    <body>
+        <div class="wrapper">
+            <div class="box">
+                <div class="row row-offcanvas row-offcanvas-left">                                
+                    <!-- main right col -->
+                    <div class="column col-sm-12 col-xs-11" id="main">                
+                        <div id="navbar">                            
+                        </div>
+                        <div>
+                            <div class="col-sm-12">
+                                <div class="row">
+                                    <a href="http://testing.theoutershell.com/" class="navbar-brand"> 
+                                        <img src="../../images/godigiologo.png" width="100" height="30" alt="">
+                                    </a>
+                                </div>
+                                <!-- content -->                      
+                                <div class="row">
+                                    <!-- main col left --> 
+                                    <div class="col-sm-5">
+                                        <!-- Profile Image Area -->
+                                        <div id="showprofile">                                            
+                                        </div>
+                                        <div id="postform" placeholder="Update your status" header="What's New">
+                                        </div>
+                                        <div id="videopanel">                                            
+                                        </div>
+                                        <div id="fanspanel">                                            
+                                        </div>
+                                        <div id="fansofpanel">                                            
+                                        </div>
+                                    </div>
+                                    <!-- main col right -->
+                                    <div class="col-sm-7">
+                                        <!-- Note : timeline div is updated in postform.js -->
+                                        <div id="timeline">                                            
+                                        </div>                                        
+                                    </div>
+                                </div><!--/row-->
+
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <!-- <a href="#">Twitter</a> <small class="text-muted">|</small> <a href="#">Facebook</a> <small class="text-muted">|</small> <a href="#">Google+</a>-->
+                                    </div>
+                                </div>
+
+                                <div class="row" id="footer">    
+                                    <div class="col-md-4">
+                                        <h4>About GoDigio</h4>
+                                        <ul class="list-unstyled">
+                                            <li><a href="http://testing.theoutershell.com/services.html">Artist Management</a></li>
+                                            <li><a href="http://testing.theoutershell.com/services.html">About GoDigio</a></li>
+                                            <li><a href="http://testing.theoutershell.com/services.html">Community</a></li>
+                                            <li><a href="http://testing.theoutershell.com/services.html">Management</a></li>
+                                            <li><a href="http://testing.theoutershell.com/services.html">Opportunities</a></li>
+                                            <li><a href="http://testing.theoutershell.com/services.html">Sovergn Music Group</a></li>
+                                        </ul>
+
+
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h4>Artist &amp; Services</h4>
+                                        <ul class="list-unstyled">
+                                            <li><a href="http://testing.theoutershell.com/services.html">Artist Management</a></li>
+                                            <li><a href="http://testing.theoutershell.com/services.html">Artist Development</a></li>
+                                            <li><a href="http://testing.theoutershell.com/services.html">Website Development</a></li>
+                                            <li><a href="http://testing.theoutershell.com/services.html">Digital Distrobution</a></li>
+                                            <li><a href="http://testing.theoutershell.com/services.html">Radio Airplay</a></li>
+                                            <li><a href="http://testing.theoutershell.com/services.html">Video Production</a></li>
+                                            <li><a href="http://testing.theoutershell.com/services.html">Streaming</a></li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h4>GoDigio Store</h4>
+                                        <ul class="list-unstyled">
+                                            <li><a href="http://testing.theoutershell.com/services.html">Top Artists</a></li>
+                                            <li><a href="http://testing.theoutershell.com/services.html">Top Albumns</a></li>
+                                            <li><a href="http://testing.theoutershell.com/services.html">Top Songs</a></li>
+                                            <li><a href="http://testing.theoutershell.com/services.html">Genres</a></li>
+
+                                        </ul>
+
+                                    </div>
+                                </div><p></p>
+                            </div>
+
+                            <hr>
+
+                            <h4 class="text-center">
+                                <!--<a href="http://bootply.com/96266" target="ext">Download this Template @Bootply</a>-->
+                            </h4>
+
+                            <hr>
+
+
+                        </div><!-- /col-9 -->
+                    </div><!-- /padding -->
+                </div>
+                <!-- /main -->
+
+            </div>
+        </div>
+
+
+
+        <!--post modal-->
+        <div id="postModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        Update Status
+                    </div>
+                    <div class="modal-body">
+                        <form class="form center-block">
+                            <div class="form-group">
+                                <textarea class="form-control input-lg" autofocus="" placeholder="What do you want to share?"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <div>
+                            <button class="btn btn-primary btn-sm" data-dismiss="modal" aria-hidden="true">Post</button>
+                            <ul class="pull-left list-inline"><li><a href=""><i class="glyphicon glyphicon-upload"></i></a></li><li><a href=""><i class="glyphicon glyphicon-camera"></i></a></li><li><a href=""><i class="glyphicon glyphicon-map-marker"></i></a></li></ul>
+                        </div>	
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Bootstrap core JavaScript
+================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="./fanhub_cameron_files/jquery.min.js"></script>
+        <script src="./fanhub_cameron_files/bootstrap.min.js"></script>
+        <script src="./fanhub_cameron_files/fanhub.js"></script>
+        <script src="//cdn.jsdelivr.net/pouchdb/latest/pouchdb.min.js"></script>
+        <script src="../build/react.js"></script>
+        <script src="../build/JSXTransformer.js"></script>
+        <script src="../js/blob-util.min.js"></script>
+        <script type="text/jsx" src="../react_components/navbar.js"></script>  
+        <script type="text/jsx" src="../react_components/showprofile.js"></script>  
+        <script type="text/jsx" src="../react_components/postform.js"></script>  
+        <script type="text/jsx" src="../react_components/photopanel.js"></script>
+        <script type="text/jsx" src="../react_components/videopanel.js"></script>
+        <script type="text/jsx" src="../react_components/fanspanel.js"></script>
+        <script type="text/jsx" src="../react_components/fansofpanel.js"></script>
+        <script type="text/jsx" src="../react_components/timeline.js"></script>
+    </body></html>
