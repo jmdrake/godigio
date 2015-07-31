@@ -215,6 +215,39 @@ function updatePosts(){
     });
 }
 
+postquery.rows.forEach(function(post){
+    if(post["_attachments"] && post["_attachments"]["image"]) {
+        postdb.getAttachment(post["_id"], "image").then(function(image){
+            imgurl = blobUtil.createObjectURL(image);
+            React.render(
+                <Post post={post} image={imgurl}/>,
+                postlistdiv
+            )
+        })
+    }
+})
+
+postquery.rows.forEach(function(post){
+    getAttachment(postid, "image").then(function(imgurl){
+        React.render(
+            <Post post={post} image={imgurl}/>,
+            postlistdiv
+        )
+    })
+    
+    if(post["_attachments"] && post["_attachments"]["image"]) {
+        postdb.getAttachment(post["_id"], "image").then(function(image){
+            imgurl = blobUtil.createObjectURL(image);
+            React.render(
+                <Post post={post} image={imgurl}/>,
+                postlistdiv
+            )
+        })
+    }
+})
+
+
+
 function updateFans(){
     var fanofdiv = document.getElementById("fanoflist");
     fanhub.query("my_index/fansof", {key : userinfo.userpage, include_docs : true}).then(function(fanofquery){
