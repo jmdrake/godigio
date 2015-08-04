@@ -13,6 +13,7 @@
 <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
 <![endif]-->
         <link href="./fanhub_cameron_files/fanhub.css" rel="stylesheet">
+        <link rel="stylesheet" href="../css/w3.css">
     </head>
     <body>
         <div class="wrapper">
@@ -53,9 +54,16 @@
                                         </div>                                        
                                     </div>
                                     <!-- main col right -->
-                                    <div class="col-sm-7">
-                                        <!-- Note : timeline div is updated in postform.js -->
-                                        <div id="timeline">                                            
+                                    <div id="timeline">
+                                        <div class="col-sm-7">
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading">
+                                                    <a href="#" class="pull-right">View all</a>
+                                                    <h4>Timeline</h4>
+                                                </div>
+                                                <div id="postlist">
+                                                </div>                                        
+                                            </div>     
                                         </div>                                        
                                     </div>
                                 </div><!--/row-->
@@ -107,11 +115,10 @@
         <script type="text/jsx" src="../react_components/photopanel.js"></script>
         <script type="text/jsx" src="../react_components/videopanel.js"></script>
         <script type="text/jsx" src="../react_components/imageframe.js"></script>
-        <script type="text/jsx" src="../react_components/fanspanel.js"></script>
-        <script type="text/jsx" src="../react_components/fanofpanel.js"></script>
         <script type="text/jsx" src="../react_components/timeline.js"></script>
         <script type="text/jsx" src="../react_components/footer.js"></script>  
         <script type="text/jsx" src="../react_components/logo.js"></script>  
+        <script type="text/jsx" src="../react_components/fanlist.js"></script>  
         <script type="text/jsx" src="fanhub.js"></script>
     </body>
 </html>

@@ -9,17 +9,18 @@ var Comments = React.createClass({
     var createItem = function(itemText, index) {
       return <li key={index + itemText}>{itemText}</li>;
     };
-    return <ul>{this.props.comments.map(createItem)}</ul>;
+    return <ul className="w3-ul">{this.props.comments.map(createItem)}</ul>;
   }
 });
 
 var Post = React.createClass({
     getInitialState: function() {
-        var comments = this.props.post.doc.comments ? this.props.post.doc.comments : [];              
+        var comments = this.props.post.comments ? this.props.post.comments : [];              
         return {
             comments: comments, 
-            doc : this.props.post.doc,
-            commentcount : comments.length
+            doc : this.props.post,
+            commentcount : comments.length,
+            imgdisplay : this.props.post.url == null ? "none" : "block"
         };
     },
     handleSubmit: function(e) {
@@ -37,7 +38,7 @@ var Post = React.createClass({
         }
     },
     deletePost: function(post){
-        messagedb.remove(post.doc).catch(function(err){
+        messagedb.remove(post).catch(function(err){
             console.log(err.name);
             console.log(JSON.stringify(post));
         });
@@ -47,12 +48,14 @@ var Post = React.createClass({
             <div className="row" id={this.props.post.id} key={this.props.post.id}>
                 <br/>
                 <div className="col-md-2 col-sm-3 text-center">
-                    <a className="story-img" href="#"><img src="../images/100x100.jpg" style={{ "width": "100px", "height": "100px"}} className="img-circle" /></a>
+                    <a className="story-img" href="#">
+                        <img src={this.props.post.url} style={{ "width": "100px", "height": "100px", "display" : this.state.imgdisplay}} className="img-circle" />
+                    </a>
                 </div>
                 <div className="col-md-10 col-sm-9">
                     <div className="row">
                         <div className="col-xs-9">
-                            <p>{this.props.post.doc.text}</p>
+                            <p>{this.props.post.text}</p>
                             <ul className="list-inline">
                                 <li><a href="#">2 Days Ago</a></li>
                                 <li><a href="#"><i className="glyphicon glyphicon-comment" ></i> {this.state.commentcount} Comments</a></li>
@@ -70,7 +73,9 @@ var Post = React.createClass({
                                     <input type="text" className="form-control" placeholder="Add a comment.." ref="comment"/>
                                 </div>
                             </form>
-                            <Comments comments={this.state.comments}/>
+                            <div className="w3-container">
+                                <Comments comments={this.state.comments}/>
+                            </div>
                         </div>
                         <div className="col-xs-3"></div>
                     </div>
@@ -85,39 +90,17 @@ var Post = React.createClass({
     }
 })
 
-var PostList = React.createClass({
+var Timeline = React.createClass({
     render: function() {
-        var deletePost = function(post){
-            // e.preventDefault();
-            messagedb.remove(post.doc);
-        };
-        var createPost = function(post, index) {           
+        var postlist = this.props.posts.map(function(post){
             return (
                 <Post post={post}/>
-            )          
-        };
+            )
+        });
         return (
-            <div className="panel-body">
-                {this.props.items.map(createPost)}
+            <div className = "postlist">
+            {postlist}
             </div>
-        );
-    }
-});
-
-var Timeline = React.createClass({
-    getInitialState: function() {
-        return {items: this.props.postlist};
-    },
-    render: function() {
-        return(
-            <div className="panel panel-default">
-                <div className="panel-heading">
-                    <a href="#" className="pull-right">View all</a>
-                    <h4>Timeline</h4>
-                </div>
-                <PostList items={this.state.items}/>
-            </div>            
         )
     }
 })
-

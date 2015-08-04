@@ -52,14 +52,44 @@ function getProfileImage(user){
 var defaultimg = "../images/profile-icon.png";
 function getProfileImagev2(user){
     return new Promise(function(resolve, reject){
-        profiles.get(user).then(function(doc){
-            if(!(doc["_attachments"] && doc["_attachments"]["profilepic"])) {
-                resolve({imgsrc : defaultimg, firstname : doc.firstname, lastname : doc.lastname})
+        profiles.get(user).then(function(doc){            
+            if(!(doc["_attachments"] && doc["_attachments"]["profilepic"])) {                
+                resolve({imgsrc : defaultimg, firstname : doc.firstname, lastname : doc.lastname,  userid : doc["_id"]})
             } else {
                 profiles.getAttachment(user, "profilepic").then(function(result){
-                    resolve({imgsrc : blobUtil.createObjectURL(result), firstname : doc.firstname, lastname : doc.lastname})
+                    resolve({imgsrc : blobUtil.createObjectURL(result), firstname : doc.firstname, lastname : doc.lastname, userid : doc["_id"]})
                 })
             }
+        })
+    })
+}
+
+function getAttachment(db, key, attachment){
+    return new Promise(function(resolve, reject){
+        db.get(key).then(function(doc){
+            if(!(doc["_attachments"] && doc["_attachments"][attachment])) {
+                resolve(null)
+            } else {
+                db.getAttachment(key, attachment).then(function(result){
+                    resolve(blobUtil.createObjectURL(result))
+                })
+            }
+        })
+    })
+}
+
+function getAttachments(db, records, attachname){
+    return new Promise(function(resolve, reject){
+        var newlist = [];
+        records.forEach(function(record){
+            getAttachment(db, record.doc["_id"], attachname).then(function(attachment){
+                var newdoc = record.doc;
+                // newdoc["url"] = attachment == null ?  defaulturl : attachment;
+                newdoc["url"] = attachment;
+                newlist[newlist.length] = newdoc;
+                if(newlist.length >= records.length) 
+                    resolve(newlist)                
+            })
         })
     })
 }
@@ -132,10 +162,13 @@ function renderApplication(){
         })
 
         // Render Profile, Timeline and Fans panel
-        posts.query("my_index/by_user", 
-            {key : user.userpage, include_docs : true, descending : true}).then(function(res){
-            React.render(<Timeline postlist={res.rows}/>,
-                document.getElementById("timeline"));
+        posts.query("my_index/by_user", {key : user.userpage, include_docs : true, descending : true}).then(function(res){
+            getAttachments(posts, res.rows, "image").then(function(docs){
+                React.render(
+                    <Timeline posts={docs}/>,
+                    document.getElementById("postlist")
+                );
+            })
             return res.rows;
         }).then(function(postlist){
             fanhub.query("my_index/fans", {key : user.userpage, include_docs : true}).then(function(fanquery){
@@ -147,14 +180,11 @@ function renderApplication(){
                     <h4>Fans Of {name}</h4>,
                     document.getElementById("fansheader")
                 );
-                fanquery.rows.forEach(function(fan){
-                    fanid = fan.id.split("+")[0];
-                    getProfileImagev2(fanid).then(function(image){
-                        React.render(
-                            <Imageframe src={image.imgsrc} desc={image.firstname + " " + image.lastname} link={"?user=" + fanid}/>,
-                            document.getElementById("fanslist")
-                        )
-                    })
+                getProfileInfo(fanquery.rows, function(key){return key.split("+")[0];}).then(function(fans){
+                    React.render(
+                        <Fanlist fans={fans}/>,
+                        document.getElementById("fanslist")
+                    )
                 })
             }).catch(function(err){
                 console.log(err);
@@ -166,15 +196,13 @@ function renderApplication(){
                 <h4>{name} is a Fan Of </h4>,
                 document.getElementById("fanofheader")
             );
-            fanofquery.rows.forEach(function(fan){
-                fanid = fan.id.split("+")[1];
-                getProfileImagev2(fanid).then(function(image){
-                    React.render(
-                        <Imageframe src={image.imgsrc} desc={image.firstname + " " + image.lastname} link={"?user=" + fanid}/>,
-                        document.getElementById("fanoflist")
-                    )
-                })
-            })
+            
+            getProfileInfo(fanofquery.rows, function(key){return key.split("+")[1];}).then(function(fans){
+                React.render(
+                    <Fanlist fans={fans}/>,
+                    fanofdiv
+                )
+            });                        
         });      
 
         // Render post form if this is user's homepage
@@ -194,16 +222,19 @@ function renderApplication(){
     })
 }
 
+
+var postdiv = document.getElementById("postlist");
 function updatePosts(){
-    var timelinediv = document.getElementById("timeline");
-    posts.query("my_index/by_user", {key : userinfo.userpage, include_docs : true, descending : true}).
-    then(function(res){
-        timelinediv.innerHTML = "";
-        React.render(
-            <Timeline postlist={res.rows}/>,
-            timelinediv       
-        )
-    return res.rows;
+    console.log("Updating timeline");
+    posts.query("my_index/by_user", {key : userinfo.userpage, include_docs : true, descending : true}).then(function(res){
+        getAttachments(posts, res.rows, "image").then(function(docs){
+            postdiv.innerHTML = "";
+            React.render(
+                <Timeline posts={docs}/>,
+                postdiv                
+            );
+        })        
+        return res.rows;
     }).then(function(postlist){
         fanhub.query("my_index/fanscount", {key : userinfo.fantoken}).then(function(fancount){
             fancount = fancount.rows.length > 0 ? fancount.rows[0] : 0;
@@ -215,65 +246,42 @@ function updatePosts(){
     });
 }
 
-postquery.rows.forEach(function(post){
-    if(post["_attachments"] && post["_attachments"]["image"]) {
-        postdb.getAttachment(post["_id"], "image").then(function(image){
-            imgurl = blobUtil.createObjectURL(image);
-            React.render(
-                <Post post={post} image={imgurl}/>,
-                postlistdiv
-            )
+function getProfileInfo(records, keyfunction){
+    return new Promise(function(resolve, reject){
+        var newlist = [];
+        records.forEach(function(record){
+            // recordid = record.id.split("+")[1];
+            recordid = keyfunction(record.id);
+            getProfileImagev2(recordid).then(function(newdoc){
+                newlist[newlist.length] = newdoc;
+                if(newlist.length >= records.length) {
+                    resolve(newlist)         
+                }
+                                           
+            })
         })
-    }
-})
-
-postquery.rows.forEach(function(post){
-    getAttachment(postid, "image").then(function(imgurl){
-        React.render(
-            <Post post={post} image={imgurl}/>,
-            postlistdiv
-        )
     })
-    
-    if(post["_attachments"] && post["_attachments"]["image"]) {
-        postdb.getAttachment(post["_id"], "image").then(function(image){
-            imgurl = blobUtil.createObjectURL(image);
-            React.render(
-                <Post post={post} image={imgurl}/>,
-                postlistdiv
-            )
-        })
-    }
-})
+}
 
-
+var fanofdiv = document.getElementById("fanoflist");
+var fandiv = document.getElementById("fanslist");
 
 function updateFans(){
-    var fanofdiv = document.getElementById("fanoflist");
     fanhub.query("my_index/fansof", {key : userinfo.userpage, include_docs : true}).then(function(fanofquery){
-        fanofdiv.innerHTML = "";
-        fanofquery.rows.forEach(function(fan){
-            fanid = fan.id.split("+")[1];
-            getProfileImagev2(fanid).then(function(image){
-                React.render(
-                    <Imageframe src={image.imgsrc} desc={image.firstname + " " + image.lastname} link={"?user=" + fanid}/>,
-                    fanofdiv
-                )
-            })
+        getProfileInfo(fanofquery.rows, function(key){return key.split("+")[1];}).then(function(fans){
+            React.render(
+                <Fanlist fans={fans}/>,
+                fanofdiv
+            )
         })
-    });          
+    });
 
-    var fandiv = document.getElementById("fanslist");
     fanhub.query("my_index/fans", {key : userinfo.userpage, include_docs : true}).then(function(fanquery){
-        fandiv.innerHTML = "";
-        fanquery.rows.forEach(function(fan){
-            fanid = fan.id.split("+")[0];
-            getProfileImagev2(fanid).then(function(image){
-                React.render(
-                    <Imageframe src={image.imgsrc} desc={image.firstname + " " + image.lastname} link={"?user=" + fanid}/>,
-                    fandiv
-                )
-            })
+        getProfileInfo(fanquery.rows, function(key){return key.split("+")[0];}).then(function(fans){
+            React.render(
+                <Fanlist fans={fans}/>,
+                fandiv
+            )
         })
     });          
 }
