@@ -5,10 +5,11 @@
 * Time: 11:29 AM
 * To change this template use Tools | Templates.
 */
+"use strict";
+
 var clouddb = "https://visionpartners.cloudant.com/";
 var artistdb = new PouchDB(clouddb + "godigioartists");
 var artistList = document.getElementById("sampleartists");
-
 
 /* function showArtists() {
     artistList.innerHTML = "";
@@ -42,39 +43,43 @@ var artistList = document.getElementById("sampleartists");
     });        
 } */
 
-function showArtists(){
+function showArtists() {
     artistList.innerHTML = "";
-    artistdb.allDocs({include_docs: true, attachements: true, descending: true}, function(err, doc) {
-        doc.rows.forEach(function(row){            
-            artistdb.getAttachment(row.id, row.doc.coverart).then(function(blob){
-                var div = document.createElement("div");                
-                
+    artistdb.allDocs({ include_docs: true, attachements: true, descending: true }, function (err, doc) {
+        doc.rows.forEach(function (row) {
+            artistdb.getAttachment(row.id, row.doc.coverart).then(function (blob) {
+                var div = document.createElement("div");
+
                 var imagesrc = blobUtil.createObjectURL(blob);
-                React.render(
-                    <Image imgsrc={imagesrc} imgname={row.doc.name}/>,
-                    div
-                );
+                React.render(React.createElement(Image, { imgsrc: imagesrc, imgname: row.doc.name }), div);
                 artistList.appendChild(div);
-            })
-        })
-    });        
+            });
+        });
+    });
 }
 
 var Image = React.createClass({
-    render: function() {
+    displayName: "Image",
+
+    render: function render() {
         imgsrc = this.props.imgsrc;
         imgname = this.props.imgname;
-        return(
-                <div className = "col-xs-6 col-md-3">
-                    <a href="" className="thumbnail nailthumb-container square-thumb">
-                        <img src={imgsrc} style={{"position" : "relative", "width" : "212px", "height" : "148px", "top" : "0px", "left" : "-42px"}} className="nailthumb-image">
-                        </img>                                                                        
-                    </a>
-                    <h5>{imgname}</h5>
-                </div>
-        )
+        return React.createElement(
+            "div",
+            { className: "col-xs-6 col-md-3" },
+            React.createElement(
+                "a",
+                { href: "", className: "thumbnail nailthumb-container square-thumb" },
+                React.createElement("img", { src: imgsrc, style: { "position": "relative", "width": "212px", "height": "148px", "top": "0px", "left": "-42px" }, className: "nailthumb-image" })
+            ),
+            React.createElement(
+                "h5",
+                null,
+                imgname
+            )
+        );
     }
-})
+});
 
 /*
 var Gallery = React.createClass({
@@ -96,4 +101,3 @@ var Gallery = React.createClass({
 }); */
 
 showArtists();
-

@@ -225,7 +225,6 @@ function renderApplication(){
 
 var postdiv = document.getElementById("postlist");
 function updatePosts(){
-    console.log("Updating timeline");
     posts.query("my_index/by_user", {key : userinfo.userpage, include_docs : true, descending : true}).then(function(res){
         getAttachments(posts, res.rows, "image").then(function(docs){
             postdiv.innerHTML = "";
