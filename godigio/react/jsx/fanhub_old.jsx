@@ -37,31 +37,47 @@ fanhub.get("_design/my_index").catch(function(err){
 
 var defaultimg = "../images/profile-icon.png";
 function getProfileInfo(user){
-    var def = $.Deferred();
-    profiles.get(user).then(function(doc){            
-        if(!(doc["_attachments"] && doc["_attachments"]["profilepic"])) {                
-            def.resolve({imgsrc : defaultimg, firstname : doc.firstname, lastname : doc.lastname,  userid : doc["_id"]})
-        } else {
-            profiles.getAttachment(user, "profilepic").then(function(result){
-                def.resolve({imgsrc : blobUtil.createObjectURL(result), firstname : doc.firstname, lastname : doc.lastname, userid : doc["_id"]})
-            })
-        }
-    });
-    return def;
+    return new Promise(function(resolve, reject){
+        profiles.get(user).then(function(doc){            
+            if(!(doc["_attachments"] && doc["_attachments"]["profilepic"])) {                
+                resolve({imgsrc : defaultimg, firstname : doc.firstname, lastname : doc.lastname,  userid : doc["_id"]})
+            } else {
+                profiles.getAttachment(user, "profilepic").then(function(result){
+                    resolve({imgsrc : blobUtil.createObjectURL(result), firstname : doc.firstname, lastname : doc.lastname, userid : doc["_id"]})
+                })
+            }
+        })
+    })
 }
 
 function getAttachment(db, key, attachment){
-    var def = $.Deferred();
-    db.get(key).then(function(doc){
-        if(!(doc["_attachments"] && doc["_attachments"][attachment])) {
-            def.resolve(null)
-        } else {
-            db.getAttachment(key, attachment).then(function(result){
-                def.resolve(blobUtil.createObjectURL(result))
+    return new Promise(function(resolve, reject){
+        db.get(key).then(function(doc){
+            if(!(doc["_attachments"] && doc["_attachments"][attachment])) {
+                resolve(null)
+            } else {
+                db.getAttachment(key, attachment).then(function(result){
+                    resolve(blobUtil.createObjectURL(result))
+                })
+            }
+        })
+    })
+}
+
+function getAttachments(db, records, attachname){
+    return new Promise(function(resolve, reject){
+        var newlist = [];
+        records.forEach(function(record){
+            getAttachment(db, record.doc["_id"], attachname).then(function(attachment){
+                var newdoc = record.doc;
+                // newdoc["url"] = attachment == null ?  defaulturl : attachment;
+                newdoc["url"] = attachment;
+                newlist[newlist.length] = newdoc;
+                if(newlist.length >= records.length) 
+                    resolve(newlist)                
             })
-        }
-    });
-    return def;
+        })
+    })
 }
 
 function getUserInformation() {
@@ -86,24 +102,6 @@ function getUserInformation() {
     });
     return def;
 }
-
-function getAttachments(db, records, attachname){
-    var def = $.Deferred();
-    var newlist = [];
-    records.forEach(function(record){
-        getAttachment(db, record.doc["_id"], attachname).then(function(attachment){
-            var newdoc = record.doc;
-            newdoc["url"] = attachment;
-            newlist[newlist.length] = newdoc;
-            if(newlist.length >= records.length) 
-                def.resolve(newlist)                
-        })
-    });
-    return def;
-}
-
-var fanofdiv = document.getElementById("fanoflist");
-var fandiv = document.getElementById("fanslist");
 
 var userinfo = null;
 function renderApplication(){
@@ -137,7 +135,7 @@ function renderApplication(){
                     <Timeline posts={docs}/>,
                     document.getElementById("postlist")
                 );
-            });
+            })
             return res.rows;
         }).then(function(postlist){
             fanhub.query("my_index/fans", {key : user.userpage, include_docs : true}).then(function(fanquery){
@@ -152,9 +150,9 @@ function renderApplication(){
                 mapProfileInfo(fanquery.rows, function(key){return key.split("+")[0];}).then(function(fans){
                     React.render(
                         <Fanlist fans={fans}/>,
-                        fandiv
+                        document.getElementById("fanslist")
                     )
-                })                
+                })
             }).catch(function(err){
                 console.log(err);
             })
@@ -172,8 +170,8 @@ function renderApplication(){
                     fanofdiv
                 )
             });                        
-        });         
-        
+        });      
+
         // Render post form if this is user's homepage
         if(homepage)
             React.render(
@@ -215,19 +213,25 @@ function updatePosts(){
 }
 
 function mapProfileInfo(records, keyfunction){
-    var def = $.Deferred();
-    var newlist = [];
-    var recordid = null;
-    records.forEach(function(record){
-        recordid = keyfunction(record.id);
-        getProfileInfo(recordid).then(function(newdoc){
-            newlist[newlist.length] = newdoc;
-            if(newlist.length >= records.length) 
-                def.resolve(newlist)         
+    return new Promise(function(resolve, reject){
+        var newlist = [];
+        var recordid = null;
+        records.forEach(function(record){
+            // recordid = record.id.split("+")[1];
+            recordid = keyfunction(record.id);
+            getProfileInfo(recordid).then(function(newdoc){
+                newlist[newlist.length] = newdoc;
+                if(newlist.length >= records.length) {
+                    resolve(newlist)         
+                }
+                                           
+            })
         })
     })
-    return def;
 }
+
+var fanofdiv = document.getElementById("fanoflist");
+var fandiv = document.getElementById("fanslist");
 
 function updateFans(){
     fanhub.query("my_index/fansof", {key : userinfo.userpage, include_docs : true}).then(function(fanofquery){
@@ -249,14 +253,15 @@ function updateFans(){
     });          
 }
 
-fanhub.changes({
-    since: 'now',
-    live: true
-}).on('change', updateFans);
-
 posts.changes({
     since: 'now',
     live: true
 }).on('change', updatePosts);
 
+fanhub.changes({
+    since: 'now',
+    live: true
+}).on('change', updateFans);
+
 renderApplication();
+

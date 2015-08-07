@@ -37,7 +37,7 @@ var VideoPanel = React.createClass({
             imagedisplay: "none",
             videosource: "../images/Big_Buck_Bunny.mp4",
             imagesource: "../images/Sakura_Tree_large.jpg",
-            displaystate: ["block", "none", "none", "none"]
+            displaystate: ["block", "none", "none"]
         };
     },
     render: function render() {
@@ -64,7 +64,6 @@ var VideoPanel = React.createClass({
                 React.createElement(
                     "div",
                     { id: "picturevideoframe", className: "row", style: { height: "300px" } },
-                    React.createElement(VideoFrame, { source: "../images/Big_Buck_Bunny.mp4", display: this.state.displaystate[0] }),
                     React.createElement(ImageFrame, { source: "../images/Sakura_Tree_large.jpg", display: this.state.displaystate[1] }),
                     React.createElement(ImageFrame, { source: "../images/Tulip_large.jpg", display: this.state.displaystate[2] }),
                     React.createElement(ImageFrame, { source: "../images/Swan_large.jpg", display: this.state.displaystate[3] })
@@ -78,7 +77,7 @@ var VideoPanel = React.createClass({
                         React.createElement(
                             "a",
                             { href: "#" },
-                            React.createElement("img", { onClick: this.setDisplay.bind(null, 0), className: "thumbnail img-responsive", src: "../images/Big_Buck_Bunny.jpg" })
+                            React.createElement("img", { onClick: this.setDisplay.bind(null, 0), className: "thumbnail img-responsive", src: "../images/Sakura_Tree_small.jpg" })
                         )
                     ),
                     React.createElement(
@@ -87,7 +86,7 @@ var VideoPanel = React.createClass({
                         React.createElement(
                             "a",
                             { href: "#" },
-                            React.createElement("img", { onClick: this.setDisplay.bind(null, 1), className: "thumbnail img-responsive", src: "../images/Sakura_Tree_small.jpg" })
+                            React.createElement("img", { onClick: this.setDisplay.bind(null, 1), className: "thumbnail img-responsive", src: "../images/Tulip_small.jpg" })
                         )
                     ),
                     React.createElement(
@@ -96,16 +95,7 @@ var VideoPanel = React.createClass({
                         React.createElement(
                             "a",
                             { href: "#" },
-                            React.createElement("img", { onClick: this.setDisplay.bind(null, 2), className: "thumbnail img-responsive", src: "../images/Tulip_small.jpg" })
-                        )
-                    ),
-                    React.createElement(
-                        "div",
-                        { className: "col-lg-3 col-sm-4 col-xs-6" },
-                        React.createElement(
-                            "a",
-                            { href: "#" },
-                            React.createElement("img", { onClick: this.setDisplay.bind(null, 3), className: "thumbnail img-responsive", src: "../images/Swan_small.jpg" })
+                            React.createElement("img", { onClick: this.setDisplay.bind(null, 2), className: "thumbnail img-responsive", src: "../images/Swan_small.jpg" })
                         )
                     )
                 )

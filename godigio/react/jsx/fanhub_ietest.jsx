@@ -259,4 +259,6 @@ posts.changes({
     live: true
 }).on('change', updatePosts);
 
+
 renderApplication();
+

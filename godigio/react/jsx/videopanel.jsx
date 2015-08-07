@@ -33,7 +33,7 @@ var VideoPanel = React.createClass({
             imagedisplay: "none", 
             videosource:"../images/Big_Buck_Bunny.mp4",
             imagesource:"../images/Sakura_Tree_large.jpg",
-            displaystate:["block", "none", "none", "none"]
+            displaystate:["block", "none", "none"]
         };
     },
     render: function() {
@@ -42,7 +42,6 @@ var VideoPanel = React.createClass({
                 <div className="panel-heading"><a href="#" className="pull-right">View all</a><h4>John Doe's Photos and Videos</h4></div>
                 <div className="panel-body">
                     <div id="picturevideoframe" className="row" style={{height:"300px"}}>
-                        <VideoFrame source="../images/Big_Buck_Bunny.mp4" display={this.state.displaystate[0]}/>
                         <ImageFrame source="../images/Sakura_Tree_large.jpg" display={this.state.displaystate[1]}/>
                         <ImageFrame source="../images/Tulip_large.jpg" display={this.state.displaystate[2]}/>
                         <ImageFrame source="../images/Swan_large.jpg" display={this.state.displaystate[3]}/>            
@@ -50,22 +49,17 @@ var VideoPanel = React.createClass({
                     <div className="row">
                         <div className="col-lg-3 col-sm-4 col-xs-6">
                             <a href="#">
-                                <img onClick={this.setDisplay.bind(null, 0)} className="thumbnail img-responsive" src="../images/Big_Buck_Bunny.jpg"/>
+                                <img onClick={this.setDisplay.bind(null, 0)} className="thumbnail img-responsive" src="../images/Sakura_Tree_small.jpg"></img>
                             </a>
                         </div>
                         <div className="col-lg-3 col-sm-4 col-xs-6">
                             <a href="#">
-                                <img onClick={this.setDisplay.bind(null, 1)} className="thumbnail img-responsive" src="../images/Sakura_Tree_small.jpg"></img>
+                                <img onClick={this.setDisplay.bind(null, 1)} className="thumbnail img-responsive" src="../images/Tulip_small.jpg"></img>
                             </a>
                         </div>
                         <div className="col-lg-3 col-sm-4 col-xs-6">
                             <a href="#">
-                                <img onClick={this.setDisplay.bind(null, 2)} className="thumbnail img-responsive" src="../images/Tulip_small.jpg"></img>
-                            </a>
-                        </div>
-                        <div className="col-lg-3 col-sm-4 col-xs-6">
-                            <a href="#">
-                                <img onClick={this.setDisplay.bind(null, 3)} className="thumbnail img-responsive" src="../images/Swan_small.jpg"></img>
+                                <img onClick={this.setDisplay.bind(null, 2)} className="thumbnail img-responsive" src="../images/Swan_small.jpg"></img>
                             </a>
                         </div>
                     </div>

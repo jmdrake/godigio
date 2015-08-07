@@ -23,7 +23,7 @@ var Navbar = React.createClass({
             fanhub.put({ "_id": this.props.fantoken });
             this.setState({ btnlabel: "unfan" });
         } else {
-            self = this;
+            var self = this;
             fanhub.get(this.props.fantoken).then(function (doc) {
                 fanhub.remove(doc);
                 self.setState({ btnlabel: "fan" });
