@@ -36,6 +36,7 @@ fanhub.get("_design/my_index")["catch"](function (err) {
     }
 });
 
+<<<<<<< HEAD
 var ddoc_posts = {
     "_id": "_design/my_index",
     "views": {
@@ -52,6 +53,8 @@ posts.get("_design/my_index")["catch"](function (err) {
     }
 });
 
+=======
+>>>>>>> 3fc016841518ebb71adcd5ea51fdcdd0a996f4e2
 var defaultimg = "../images/profile-icon.png";
 function getProfileInfo(user) {
     var def = $.Deferred();
@@ -87,12 +90,16 @@ function getUserInformation() {
     user.userpage = null;
     console.log("Trace 2.0");
     fanhub.getSession().then(function (res) {
+<<<<<<< HEAD
         console.log("Trace 2.1");
+=======
+>>>>>>> 3fc016841518ebb71adcd5ea51fdcdd0a996f4e2
         user.currentuser = res.userCtx.name;
         user.userpage = window.location.search.split("=")[1];
         console.log("Trace 2.2");
         if (user.userpage == null) user.userpage = user.currentuser;
 
+<<<<<<< HEAD
         console.log("Trace 2.3");
 
         if (user.userpage == null) window.location.replace("login.html");
@@ -101,6 +108,11 @@ function getUserInformation() {
         console.log(user.userpage);
         getProfileInfo(user.userpage).then(function (res) {
             console.log("Trace 3");
+=======
+        if (user.userpage == null) user.userpage = user.currentuser;
+
+        getProfileInfo(user.userpage).then(function (res) {
+>>>>>>> 3fc016841518ebb71adcd5ea51fdcdd0a996f4e2
             user.firstname = res.firstname;
             user.lastname = res.lastname;
             user.profilepic = res.imgsrc;
@@ -131,7 +143,10 @@ var fandiv = document.getElementById("fanslist");
 
 var userinfo = null;
 function renderApplication() {
+<<<<<<< HEAD
     console.log("Trace 1.0");
+=======
+>>>>>>> 3fc016841518ebb71adcd5ea51fdcdd0a996f4e2
     getUserInformation().then(function (user) {
         var homepage = user.userpage == user["currentuser"] || user.userpage == null;
         var loggedin = user["currentuser"] != null;
@@ -178,7 +193,15 @@ function renderApplication() {
                     "Fans Of ",
                     name
                 ), document.getElementById("fansheader"));
+<<<<<<< HEAD
                 React.render(React.createElement(Fanlist, { fans: fanquery.rows, keyindex: 1 }), fandiv);
+=======
+                mapProfileInfo(fanquery.rows, function (key) {
+                    return key.split("+")[0];
+                }).then(function (fans) {
+                    React.render(React.createElement(Fanlist, { fans: fans }), fandiv);
+                });
+>>>>>>> 3fc016841518ebb71adcd5ea51fdcdd0a996f4e2
             })["catch"](function (err) {
                 console.log(err);
             });
@@ -191,7 +214,16 @@ function renderApplication() {
                 name,
                 " is a Fan Of "
             ), document.getElementById("fanofheader"));
+<<<<<<< HEAD
             React.render(React.createElement(Fanlist, { fans: fanofquery.rows, keyindex: 0 }), fandiv);
+=======
+
+            mapProfileInfo(fanofquery.rows, function (key) {
+                return key.split("+")[1];
+            }).then(function (fans) {
+                React.render(React.createElement(Fanlist, { fans: fans }), fanofdiv);
+            });
+>>>>>>> 3fc016841518ebb71adcd5ea51fdcdd0a996f4e2
         });
 
         // Render post form if this is user's homepage
