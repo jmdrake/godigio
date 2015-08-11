@@ -6,9 +6,10 @@
 * To change this template use Tools | Templates.
 */
 
-var fanhub = new PouchDB("https://admin:8a7d03517aed@godigio.smileupps.com/fanhub");
-var profiles = new PouchDB("https://admin:8a7d03517aed@godigio.smileupps.com/profiles");
-var posts = new PouchDB("https://admin:8a7d03517aed@godigio.smileupps.com/posts");
+var fanhub = new PouchDB("https://godigiolive.iriscouch.com/fanhub");
+var profiles = new PouchDB("https://godigiolive.iriscouch.com/profiles");
+var posts = new PouchDB("https://godigiolive.iriscouch.com/posts");
+
 
 var ddoc_fanhub = {
     "_id" : '_design/my_index',
@@ -34,74 +35,63 @@ fanhub.get("_design/my_index").catch(function(err){
     }
 });
 
-var ddoc_posts = {
-    "_id" : "_design/my_index",
-    "views" : {
-        "by_user" : {
-            "map" : "function(doc) {emit(doc.user)}"
-        }
-   
-    }
-}
-
-posts.get("_design/my_index").catch(function(err){
-    if(err.status==404){
-        posts.put(ddoc_posts)
-    }
-});
-
-
 var defaultimg = "../images/profile-icon.png";
 function getProfileInfo(user){
-    var def = $.Deferred();
-    profiles.get(user).then(function(doc){            
-        if(!(doc["_attachments"] && doc["_attachments"]["profilepic"])) {                
-            def.resolve({imgsrc : defaultimg, firstname : doc.firstname, lastname : doc.lastname,  userid : doc["_id"]})
-        } else {
-            profiles.getAttachment(user, "profilepic").then(function(result){
-                def.resolve({imgsrc : blobUtil.createObjectURL(result), firstname : doc.firstname, lastname : doc.lastname, userid : doc["_id"]})
-            })
-        }
-    });
-    return def;
+    return new Promise(function(resolve, reject){
+        profiles.get(user).then(function(doc){            
+            if(!(doc["_attachments"] && doc["_attachments"]["profilepic"])) {                
+                resolve({imgsrc : defaultimg, firstname : doc.firstname, lastname : doc.lastname,  userid : doc["_id"]})
+            } else {
+                profiles.getAttachment(user, "profilepic").then(function(result){
+                    resolve({imgsrc : blobUtil.createObjectURL(result), firstname : doc.firstname, lastname : doc.lastname, userid : doc["_id"]})
+                })
+            }
+        })
+    })
 }
 
 function getAttachment(db, key, attachment){
-    var def = $.Deferred();
-    db.get(key).then(function(doc){
-        if(!(doc["_attachments"] && doc["_attachments"][attachment])) {
-            def.resolve(null)
-        } else {
-            db.getAttachment(key, attachment).then(function(result){
-                def.resolve(blobUtil.createObjectURL(result))
+    return new Promise(function(resolve, reject){
+        db.get(key).then(function(doc){
+            if(!(doc["_attachments"] && doc["_attachments"][attachment])) {
+                resolve(null)
+            } else {
+                db.getAttachment(key, attachment).then(function(result){
+                    resolve(blobUtil.createObjectURL(result))
+                })
+            }
+        })
+    })
+}
+
+function getAttachments(db, records, attachname){
+    return new Promise(function(resolve, reject){
+        var newlist = [];
+        records.forEach(function(record){
+            getAttachment(db, record.doc["_id"], attachname).then(function(attachment){
+                var newdoc = record.doc;
+                // newdoc["url"] = attachment == null ?  defaulturl : attachment;
+                newdoc["url"] = attachment;
+                newlist[newlist.length] = newdoc;
+                if(newlist.length >= records.length) 
+                    resolve(newlist)                
             })
-        }
-    });
-    return def;
+        })
+    })
 }
 
 function getUserInformation() {
     var def = $.Deferred();
     var user = {};
     user.userpage = null;
-    console.log("Trace 2.0");
     fanhub.getSession().then(function(res){
-        console.log("Trace 2.1");
         user.currentuser = res.userCtx.name;
         user.userpage = window.location.search.split("=")[1];        
-        console.log("Trace 2.2");
+        
         if(user.userpage==null)
             user.userpage = user.currentuser;
         
-        console.log("Trace 2.3");
-        
-        if(user.userpage == null)
-            window.location.replace("login.html");
-            
-        console.log("Trace 2.4");
-        console.log(user.userpage);
         getProfileInfo(user.userpage).then(function(res){
-            console.log("Trace 3");
             user.firstname = res.firstname;
             user.lastname = res.lastname;
             user.profilepic = res.imgsrc;
@@ -113,71 +103,39 @@ function getUserInformation() {
     return def;
 }
 
-function getAttachments(db, records, attachname){
-    var def = $.Deferred();
-    var newlist = [];
-    records.forEach(function(record){
-        getAttachment(db, record.doc["_id"], attachname).then(function(attachment){
-            var newdoc = record.doc;
-            newdoc["url"] = attachment;
-            newlist[newlist.length] = newdoc;
-            if(newlist.length >= records.length) 
-                def.resolve(newlist)                
-        })
-    });
-    return def;
-}
-
-var fanofdiv = document.getElementById("fanoflist");
-var fandiv = document.getElementById("fanslist");
-
 var userinfo = null;
 function renderApplication(){
-    console.log("Trace 1.0");
     getUserInformation().then(function(user){                
         var homepage = user.userpage == user["currentuser"] || user.userpage == null;
         var loggedin = user["currentuser"] != null;
-        var fanbutton = !homepage && loggedin;
+        var fanbutton = homepage | !loggedin ? "hidden" : "visible";
         var postbutton = !loggedin ? "hidden" : "visible";
         user.fantoken = user.currentuser + "+" + user.userpage;
         var name=user.firstname + " " + user.lastname;
-        console.log("Trace 4");
-        userinfo = user;
-        console.log(fanbutton);
         
-        // Render Navbar        
-        if(fanbutton){
-            console.log("Trace 5");
-            fanhub.get(user.fantoken).then(function(doc){
-                React.render(<Navbar fanbuttonvisibility={"visible"} postbuttonvisibility={postbutton} btnlabel={"unfan"} fantoken={user.fantoken}/>,
+
+        userinfo = user;
+        // Render Navbar
+        fanhub.get(user.fantoken).then(function(doc){
+            React.render(<Navbar fanbuttonvisibility={fanbutton} postbuttonvisibility={postbutton} btnlabel={"unfan"} fantoken={user.fantoken}/>,
+                         document.getElementById("navbar"));
+        }).catch(function(err){
+            if(err.name == "not_found") {
+                React.render(<Navbar fanbuttonvisibility={fanbutton} postbuttonvisibility={postbutton} btnlabel={"fan"} fantoken={user.fantoken}/>,
                              document.getElementById("navbar"));
-            }).catch(function(err){
-                if(err.name == "not_found") {
-                    React.render(<Navbar fanbuttonvisibility={"visible"} postbuttonvisibility={postbutton} btnlabel={"fan"} fantoken={user.fantoken}/>,
-                                 document.getElementById("navbar"));
-                } else {
-                    console.log(err.name)
-                }
-            })    
-        } else {
-            console.log("Trace 6");
-            React.render(
-                <Navbar fanbuttonvisibility={"hidden"} postbuttonvisibility={postbutton}/>,
-                document.getElementById("navbar")
-            )       
-        }
+            } else {
+                console.log(err.name)
+            }
+        })
 
         // Render Profile, Timeline and Fans panel
         posts.query("my_index/by_user", {key : user.userpage, include_docs : true, descending : true}).then(function(res){
-            console.log(res.rows);
             getAttachments(posts, res.rows, "image").then(function(docs){
-                console.log(docs);
-                console.log(res.rows);
                 React.render(
                     <Timeline posts={docs}/>,
                     document.getElementById("postlist")
                 );
-            });
+            })
             return res.rows;
         }).then(function(postlist){
             fanhub.query("my_index/fans", {key : user.userpage, include_docs : true}).then(function(fanquery){
@@ -189,10 +147,12 @@ function renderApplication(){
                     <h4>Fans Of {name}</h4>,
                     document.getElementById("fansheader")
                 );
-                React.render(
-                    <Fanlist fans={fanquery.rows} keyindex={1}/>,
-                    fandiv
-                )
+                mapProfileInfo(fanquery.rows, function(key){return key.split("+")[0];}).then(function(fans){
+                    React.render(
+                        <Fanlist fans={fans}/>,
+                        document.getElementById("fanslist")
+                    )
+                })
             }).catch(function(err){
                 console.log(err);
             })
@@ -202,13 +162,16 @@ function renderApplication(){
             React.render(
                 <h4>{name} is a Fan Of </h4>,
                 document.getElementById("fanofheader")
-            );            
-            React.render(
-                <Fanlist fans={fanofquery.rows}  keyindex={0}/>,
-                fandiv
-            )
-        });         
-        
+            );
+            
+            mapProfileInfo(fanofquery.rows, function(key){return key.split("+")[1];}).then(function(fans){
+                React.render(
+                    <Fanlist fans={fans}/>,
+                    fanofdiv
+                )
+            });                        
+        });      
+
         // Render post form if this is user's homepage
         if(homepage)
             React.render(
@@ -250,19 +213,25 @@ function updatePosts(){
 }
 
 function mapProfileInfo(records, keyfunction){
-    var def = $.Deferred();
-    var newlist = [];
-    var recordid = null;
-    records.forEach(function(record){
-        recordid = keyfunction(record.id);
-        getProfileInfo(recordid).then(function(newdoc){
-            newlist[newlist.length] = newdoc;
-            if(newlist.length >= records.length) 
-                def.resolve(newlist)         
+    return new Promise(function(resolve, reject){
+        var newlist = [];
+        var recordid = null;
+        records.forEach(function(record){
+            // recordid = record.id.split("+")[1];
+            recordid = keyfunction(record.id);
+            getProfileInfo(recordid).then(function(newdoc){
+                newlist[newlist.length] = newdoc;
+                if(newlist.length >= records.length) {
+                    resolve(newlist)         
+                }
+                                           
+            })
         })
     })
-    return def;
 }
+
+var fanofdiv = document.getElementById("fanoflist");
+var fandiv = document.getElementById("fanslist");
 
 function updateFans(){
     fanhub.query("my_index/fansof", {key : userinfo.userpage, include_docs : true}).then(function(fanofquery){
@@ -284,14 +253,15 @@ function updateFans(){
     });          
 }
 
-fanhub.changes({
-    since: 'now',
-    live: true
-}).on('change', updateFans);
-
 posts.changes({
     since: 'now',
     live: true
 }).on('change', updatePosts);
 
+fanhub.changes({
+    since: 'now',
+    live: true
+}).on('change', updateFans);
+
 renderApplication();
+

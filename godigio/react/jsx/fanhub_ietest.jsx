@@ -6,9 +6,10 @@
 * To change this template use Tools | Templates.
 */
 
-var fanhub = new PouchDB("https://admin:8a7d03517aed@godigio.smileupps.com/fanhub");
-var profiles = new PouchDB("https://admin:8a7d03517aed@godigio.smileupps.com/profiles");
-var posts = new PouchDB("https://admin:8a7d03517aed@godigio.smileupps.com/posts");
+var fanhub = new PouchDB("https://godigiolive.iriscouch.com/fanhub");
+var profiles = new PouchDB("https://godigiolive.iriscouch.com/profiles");
+var posts = new PouchDB("https://godigiolive.iriscouch.com/posts");
+
 
 var ddoc_fanhub = {
     "_id" : '_design/my_index',
@@ -33,23 +34,6 @@ fanhub.get("_design/my_index").catch(function(err){
         fanhub.put(ddoc_fanhub)
     }
 });
-
-var ddoc_posts = {
-    "_id" : "_design/my_index",
-    "views" : {
-        "by_user" : {
-            "map" : "function(doc) {emit(doc.user)}"
-        }
-   
-    }
-}
-
-posts.get("_design/my_index").catch(function(err){
-    if(err.status==404){
-        posts.put(ddoc_posts)
-    }
-});
-
 
 var defaultimg = "../images/profile-icon.png";
 function getProfileInfo(user){
@@ -84,24 +68,14 @@ function getUserInformation() {
     var def = $.Deferred();
     var user = {};
     user.userpage = null;
-    console.log("Trace 2.0");
     fanhub.getSession().then(function(res){
-        console.log("Trace 2.1");
         user.currentuser = res.userCtx.name;
         user.userpage = window.location.search.split("=")[1];        
-        console.log("Trace 2.2");
+        
         if(user.userpage==null)
             user.userpage = user.currentuser;
         
-        console.log("Trace 2.3");
-        
-        if(user.userpage == null)
-            window.location.replace("login.html");
-            
-        console.log("Trace 2.4");
-        console.log(user.userpage);
         getProfileInfo(user.userpage).then(function(res){
-            console.log("Trace 3");
             user.firstname = res.firstname;
             user.lastname = res.lastname;
             user.profilepic = res.imgsrc;
@@ -133,46 +107,32 @@ var fandiv = document.getElementById("fanslist");
 
 var userinfo = null;
 function renderApplication(){
-    console.log("Trace 1.0");
     getUserInformation().then(function(user){                
         var homepage = user.userpage == user["currentuser"] || user.userpage == null;
         var loggedin = user["currentuser"] != null;
-        var fanbutton = !homepage && loggedin;
+        var fanbutton = homepage | !loggedin ? "hidden" : "visible";
         var postbutton = !loggedin ? "hidden" : "visible";
         user.fantoken = user.currentuser + "+" + user.userpage;
         var name=user.firstname + " " + user.lastname;
-        console.log("Trace 4");
-        userinfo = user;
-        console.log(fanbutton);
         
-        // Render Navbar        
-        if(fanbutton){
-            console.log("Trace 5");
-            fanhub.get(user.fantoken).then(function(doc){
-                React.render(<Navbar fanbuttonvisibility={"visible"} postbuttonvisibility={postbutton} btnlabel={"unfan"} fantoken={user.fantoken}/>,
+
+        userinfo = user;
+        // Render Navbar
+        fanhub.get(user.fantoken).then(function(doc){
+            React.render(<Navbar fanbuttonvisibility={fanbutton} postbuttonvisibility={postbutton} btnlabel={"unfan"} fantoken={user.fantoken}/>,
+                         document.getElementById("navbar"));
+        }).catch(function(err){
+            if(err.name == "not_found") {
+                React.render(<Navbar fanbuttonvisibility={fanbutton} postbuttonvisibility={postbutton} btnlabel={"fan"} fantoken={user.fantoken}/>,
                              document.getElementById("navbar"));
-            }).catch(function(err){
-                if(err.name == "not_found") {
-                    React.render(<Navbar fanbuttonvisibility={"visible"} postbuttonvisibility={postbutton} btnlabel={"fan"} fantoken={user.fantoken}/>,
-                                 document.getElementById("navbar"));
-                } else {
-                    console.log(err.name)
-                }
-            })    
-        } else {
-            console.log("Trace 6");
-            React.render(
-                <Navbar fanbuttonvisibility={"hidden"} postbuttonvisibility={postbutton}/>,
-                document.getElementById("navbar")
-            )       
-        }
+            } else {
+                console.log(err.name)
+            }
+        })
 
         // Render Profile, Timeline and Fans panel
         posts.query("my_index/by_user", {key : user.userpage, include_docs : true, descending : true}).then(function(res){
-            console.log(res.rows);
             getAttachments(posts, res.rows, "image").then(function(docs){
-                console.log(docs);
-                console.log(res.rows);
                 React.render(
                     <Timeline posts={docs}/>,
                     document.getElementById("postlist")
@@ -189,10 +149,12 @@ function renderApplication(){
                     <h4>Fans Of {name}</h4>,
                     document.getElementById("fansheader")
                 );
-                React.render(
-                    <Fanlist fans={fanquery.rows} keyindex={1}/>,
-                    fandiv
-                )
+                mapProfileInfo(fanquery.rows, function(key){return key.split("+")[0];}).then(function(fans){
+                    React.render(
+                        <Fanlist fans={fans}/>,
+                        fandiv
+                    )
+                })                
             }).catch(function(err){
                 console.log(err);
             })
@@ -202,11 +164,14 @@ function renderApplication(){
             React.render(
                 <h4>{name} is a Fan Of </h4>,
                 document.getElementById("fanofheader")
-            );            
-            React.render(
-                <Fanlist fans={fanofquery.rows}  keyindex={0}/>,
-                fandiv
-            )
+            );
+            
+            mapProfileInfo(fanofquery.rows, function(key){return key.split("+")[1];}).then(function(fans){
+                React.render(
+                    <Fanlist fans={fans}/>,
+                    fanofdiv
+                )
+            });                        
         });         
         
         // Render post form if this is user's homepage
@@ -294,4 +259,6 @@ posts.changes({
     live: true
 }).on('change', updatePosts);
 
+
 renderApplication();
+

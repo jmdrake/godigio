@@ -18,7 +18,7 @@ var VideoFrame = React.createClass({
    } 
 });
 
-var VideoPanel = React.createClass({
+var GalleryPanel = React.createClass({
     setDisplay: function(displayid){
         var displayarray = this.state.displaystate;
         for(var i = 0; i < 4; i++) {
@@ -39,7 +39,7 @@ var VideoPanel = React.createClass({
     render: function() {
         return(
             <div className="panel panel-default">
-                <div className="panel-heading"><a href="#" className="pull-right">View all</a><h4>John Doe's Photos and Videos</h4></div>
+                <div className="panel-heading"><a href="#" className="pull-right">View all</a><h4>{this.props.name}'s Photos and Videos</h4></div>
                 <div className="panel-body">
                     <div id="picturevideoframe" className="row" style={{height:"300px"}}>
                         <ImageFrame source="../images/Sakura_Tree_large.jpg" display={this.state.displaystate[1]}/>
@@ -69,7 +69,4 @@ var VideoPanel = React.createClass({
     }
 })
 
-React.render(
-    <VideoPanel/>,
-    document.getElementById("videopanel")
-)
+

@@ -20,8 +20,8 @@ var VideoFrame = React.createClass({
     }
 });
 
-var VideoPanel = React.createClass({
-    displayName: "VideoPanel",
+var GalleryPanel = React.createClass({
+    displayName: "GalleryPanel",
 
     setDisplay: function setDisplay(displayid) {
         var displayarray = this.state.displaystate;
@@ -55,7 +55,8 @@ var VideoPanel = React.createClass({
                 React.createElement(
                     "h4",
                     null,
-                    "John Doe's Photos and Videos"
+                    this.props.name,
+                    "'s Photos and Videos"
                 )
             ),
             React.createElement(
@@ -103,5 +104,3 @@ var VideoPanel = React.createClass({
         );
     }
 });
-
-React.render(React.createElement(VideoPanel, null), document.getElementById("videopanel"));

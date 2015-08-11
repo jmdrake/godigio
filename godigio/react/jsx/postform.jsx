@@ -1,8 +1,10 @@
 /**
 * React.js component
 */
-var postdb = new PouchDB("https://godigiolive.iriscouch.com/posts");
-var fanhub = new PouchDB("https://godigiolive.iriscouch.com/fanhub");
+
+var fanhub = new PouchDB("https://admin:8a7d03517aed@godigio.smileupps.com/fanhub");
+var profiles = new PouchDB("https://admin:8a7d03517aed@godigio.smileupps.com/profiles");
+var posts = new PouchDB("https://admin:8a7d03517aed@godigio.smileupps.com/posts");
 
 var Postform = React.createClass({
     getInitialState: function(){
@@ -12,8 +14,10 @@ var Postform = React.createClass({
         e.preventDefault();
         var data = this.refs.text.getDOMNode().value;
         var self = this;        
+        console.log("Post trace 1");
         if(this.state.displayimage=="none"){
-            postdb.put({
+            console.log("Post trace 2");
+            posts.put({
                 "_id" : new Date().toISOString(),
                 "text" : data,
                 "user" : self.props.user
@@ -21,24 +25,27 @@ var Postform = React.createClass({
                 self.refs.text.getDOMNode().value = "";
             })
         } else {
-            blobUtil.imgSrcToBlob(this.state.imagesource).then(function(blob){
-                blobUtil.blobToBase64String(blob).then(function(base64){
-                    postdb.put({
-                        "_id" : new Date().toISOString(),
-                        "text" : data,
-                        "user" : self.props.user,
-                        "_attachments" : {
-                                         'image': {
-                                             content_type: self.state.imagesource.type,
-                                             data : base64
-                                         }
-                        }
-                    }).then(function(res){
-                        self.refs.text.getDOMNode().value = "";
-                        self.setState({displayimage : "none", imagesource: null})
-                    })
-                })
-            })
+            blobUtil.dataURLToBlob(self.state.imagesource).then(function(blob){
+                console.log("Post trace 3.1");
+                return blobUtil.blobToBase64String(blob)
+            }).then(function(base64){         
+                console.log("Post trace 3.2");
+                return posts.put({
+                    "_id" : new Date().toISOString(),
+                    "text" : data,
+                    "user" : self.props.user,
+                    "_attachments" : {
+                        'image': {
+                            content_type: self.state.imagesource.type,
+                            data : base64
+                            }
+                    }
+                })                    
+            }).then(function(res){
+                console.log("Post trace 3.3");
+                self.refs.text.getDOMNode().value = "";
+                self.setState({displayimage : "none", imagesource: null})
+            });
         }
     },
     imageSelect : function(){        

@@ -1,10 +1,12 @@
 /**
 * React.js component
 */
+
 "use strict";
 
-var fanhub = new PouchDB("https://godigiolive.iriscouch.com/fanhub");
-var profiles = new PouchDB("https://godigiolive.iriscouch.com/profiles");
+var fanhub = new PouchDB("https://admin:8a7d03517aed@godigio.smileupps.com/fanhub");
+var profiles = new PouchDB("https://admin:8a7d03517aed@godigio.smileupps.com/profiles");
+var posts = new PouchDB("https://admin:8a7d03517aed@godigio.smileupps.com/posts");
 
 var Userform = React.createClass({
     displayName: "Userform",
@@ -33,8 +35,7 @@ var Userform = React.createClass({
             return profiles.put(doc);
         }).then(function (res) {
             if (imgurl != defaultimg) {
-                console.log("Trace 1");
-                blobUtil.dataURLToBlob(imgurl).then(function (blob) {
+                blobUtil.dataob(imgurl).then(function (blob) {
                     profiles.putAttachment(username, "profilepic", res.rev, blob, "images/png");
                 });
             }

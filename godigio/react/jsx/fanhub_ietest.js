@@ -8,9 +8,9 @@
 
 "use strict";
 
-var fanhub = new PouchDB("https://admin:8a7d03517aed@godigio.smileupps.com/fanhub");
-var profiles = new PouchDB("https://admin:8a7d03517aed@godigio.smileupps.com/profiles");
-var posts = new PouchDB("https://admin:8a7d03517aed@godigio.smileupps.com/posts");
+var fanhub = new PouchDB("https://godigiolive.iriscouch.com/fanhub");
+var profiles = new PouchDB("https://godigiolive.iriscouch.com/profiles");
+var posts = new PouchDB("https://godigiolive.iriscouch.com/posts");
 
 var ddoc_fanhub = {
     "_id": '_design/my_index',
@@ -33,22 +33,6 @@ var ddoc_fanhub = {
 fanhub.get("_design/my_index")["catch"](function (err) {
     if (err.status == 404) {
         fanhub.put(ddoc_fanhub);
-    }
-});
-
-var ddoc_posts = {
-    "_id": "_design/my_index",
-    "views": {
-        "by_user": {
-            "map": "function(doc) {emit(doc.user)}"
-        }
-
-    }
-};
-
-posts.get("_design/my_index")["catch"](function (err) {
-    if (err.status == 404) {
-        posts.put(ddoc_posts);
     }
 });
 
@@ -85,22 +69,13 @@ function getUserInformation() {
     var def = $.Deferred();
     var user = {};
     user.userpage = null;
-    console.log("Trace 2.0");
     fanhub.getSession().then(function (res) {
-        console.log("Trace 2.1");
         user.currentuser = res.userCtx.name;
         user.userpage = window.location.search.split("=")[1];
-        console.log("Trace 2.2");
+
         if (user.userpage == null) user.userpage = user.currentuser;
 
-        console.log("Trace 2.3");
-
-        if (user.userpage == null) window.location.replace("login.html");
-
-        console.log("Trace 2.4");
-        console.log(user.userpage);
         getProfileInfo(user.userpage).then(function (res) {
-            console.log("Trace 3");
             user.firstname = res.firstname;
             user.lastname = res.lastname;
             user.profilepic = res.imgsrc;
@@ -131,67 +106,54 @@ var fandiv = document.getElementById("fanslist");
 
 var userinfo = null;
 function renderApplication() {
-    console.log("Trace 1.0");
     getUserInformation().then(function (user) {
         var homepage = user.userpage == user["currentuser"] || user.userpage == null;
         var loggedin = user["currentuser"] != null;
-        var fanbutton = !homepage && loggedin;
+        var fanbutton = homepage | !loggedin ? "hidden" : "visible";
         var postbutton = !loggedin ? "hidden" : "visible";
         user.fantoken = user.currentuser + "+" + user.userpage;
         var name = user.firstname + " " + user.lastname;
-        console.log("Trace 4");
-        userinfo = user;
-        console.log(fanbutton);
 
-        // Render Navbar       
-        if (fanbutton) {
-            console.log("Trace 5");
-            fanhub.get(user.fantoken).then(function (doc) {
-                React.render(React.createElement(Navbar, { fanbuttonvisibility: "visible", postbuttonvisibility: postbutton, btnlabel: "unfan", fantoken: user.fantoken }), document.getElementById("navbar"));
-            })["catch"](function (err) {
-                if (err.name == "not_found") {
-                    React.render(React.createElement(Navbar, { fanbuttonvisibility: "visible", postbuttonvisibility: postbutton, btnlabel: "fan", fantoken: user.fantoken }), document.getElementById("navbar"));
-                } else {
-                    console.log(err.name);
-                }
-            });
-        } else {
-            console.log("Trace 6");
-            React.render(React.createElement(Navbar, { fanbuttonvisibility: "hidden", postbuttonvisibility: postbutton }), document.getElementById("navbar"));
-        }
+        userinfo = user;
+        // Render Navbar
+        fanhub.get(user.fantoken).then(function (doc) {
+            React.render(React.createElement(Navbar, { fanbuttonvisibility: fanbutton, postbuttonvisibility: postbutton, btnlabel: "unfan", fantoken: user.fantoken }), document.getElementById("navbar"));
+        })["catch"](function (err) {
+            if (err.name == "not_found") {
+                React.render(React.createElement(Navbar, { fanbuttonvisibility: fanbutton, postbuttonvisibility: postbutton, btnlabel: "fan", fantoken: user.fantoken }), document.getElementById("navbar"));
+            } else {
+                console.log(err.name);
+            }
+        });
 
         // Render Profile, Timeline and Fans panel
         posts.query("my_index/by_user", { key: user.userpage, include_docs: true, descending: true }).then(function (res) {
-            console.log(res.rows);
             getAttachments(posts, res.rows, "image").then(function (docs) {
-                console.log(docs);
-                console.log(res.rows);
                 React.render(React.createElement(Timeline, { posts: docs }), document.getElementById("postlist"));
             });
             return res.rows;
         }).then(function (postlist) {
             fanhub.query("my_index/fans", { key: user.userpage, include_docs: true }).then(function (fanquery) {
                 React.render(React.createElement(ShowProfile, { postcount: postlist.length, fancount: fanquery.rows.length, profileimg: user.profilepic, name: name }), document.getElementById("showprofile"));
-                React.render(React.createElement(
-                    "h4",
-                    null,
-                    "Fans Of ",
-                    name
-                ), document.getElementById("fansheader"));
-                React.render(React.createElement(Fanlist, { fans: fanquery.rows, keyindex: 1 }), fandiv);
+                React.render(React.createElement("h4", null, "Fans Of ", name), document.getElementById("fansheader"));
+                mapProfileInfo(fanquery.rows, function (key) {
+                    return key.split("+")[0];
+                }).then(function (fans) {
+                    React.render(React.createElement(Fanlist, { fans: fans }), fandiv);
+                });
             })["catch"](function (err) {
                 console.log(err);
             });
         });
 
         fanhub.query("my_index/fansof", { key: user.userpage, include_docs: true }).then(function (fanofquery) {
-            React.render(React.createElement(
-                "h4",
-                null,
-                name,
-                " is a Fan Of "
-            ), document.getElementById("fanofheader"));
-            React.render(React.createElement(Fanlist, { fans: fanofquery.rows, keyindex: 0 }), fandiv);
+            React.render(React.createElement("h4", null, name, " is a Fan Of "), document.getElementById("fanofheader"));
+
+            mapProfileInfo(fanofquery.rows, function (key) {
+                return key.split("+")[1];
+            }).then(function (fans) {
+                React.render(React.createElement(Fanlist, { fans: fans }), fanofdiv);
+            });
         });
 
         // Render post form if this is user's homepage

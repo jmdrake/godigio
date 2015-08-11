@@ -1,7 +1,11 @@
 /**
 * React.js component
 */
-var fanhub = new PouchDB("https://godigiolive.iriscouch.com/fanhub");
+
+var fanhub = new PouchDB("https://admin:8a7d03517aed@godigio.smileupps.com/fanhub");
+var profiles = new PouchDB("https://admin:8a7d03517aed@godigio.smileupps.com/profiles");
+var posts = new PouchDB("https://admin:8a7d03517aed@godigio.smileupps.com/posts");
+
 var Loginform = React.createClass({
     handleSubmit: function(e){
         e.preventDefault();

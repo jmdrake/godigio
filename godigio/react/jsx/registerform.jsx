@@ -1,11 +1,14 @@
 /**
 * React.js component
 */
-var fanhub = new PouchDB("https://godigiolive.iriscouch.com/fanhub");
-var profiles = new PouchDB("https://godigiolive.iriscouch.com/profiles");
+
+var fanhub = new PouchDB("https://admin:8a7d03517aed@godigio.smileupps.com/fanhub");
+var profiles = new PouchDB("https://admin:8a7d03517aed@godigio.smileupps.com/profiles");
+var posts = new PouchDB("https://admin:8a7d03517aed@godigio.smileupps.com/posts");
+
 var Registerform = React.createClass({
     getInitialState: function() {
-        defaultimg = "../images/100x100.jpg";
+        var defaultimg = "../images/100x100.jpg";
         return {
             imagesource: defaultimg,
             defaultimg : defaultimg
@@ -75,7 +78,6 @@ var Registerform = React.createClass({
         window.replace("login.html");
     },
     render: function() {
-        property = this.props.property;
         return(
             <div className="w3-container w3-half" >
                 <form className="w3-container w3-card-4" onSubmit={this.handleSubmit}>

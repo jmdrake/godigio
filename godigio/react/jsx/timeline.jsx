@@ -1,7 +1,7 @@
 /**
 * React.js component
 */
-var clouddb = "https://godigiolive.iriscouch.com/";
+var clouddb = "https://admin:8a7d03517aed@godigio.smileupps.com/";
 var messagedb = new PouchDB(clouddb + "posts");
 
 var Comments = React.createClass({
