@@ -18,37 +18,41 @@ var Postform = React.createClass({
         e.preventDefault();
         var data = this.refs.text.getDOMNode().value;
         var self = this;
-        console.log("Post trace 1");
+        var imagesource;
+        var file_data = this.state.file_data;
+        var form_data = new FormData();
+        var newdoc = { "_id": new Date().toISOString(), "text": data, "user": self.props.user };
+        form_data.append('file', file_data);
+        form_data.append('name', "images-" + newdoc["_id"]);
         if (this.state.displayimage == "none") {
             console.log("Post trace 2");
-            posts.put({
-                "_id": new Date().toISOString(),
-                "text": data,
-                "user": self.props.user
-            }).then(function (res) {
+            posts.put(newdoc).then(function (res) {
                 self.refs.text.getDOMNode().value = "";
             });
         } else {
-            blobUtil.dataURLToBlob(self.state.imagesource).then(function (blob) {
-                console.log("Post trace 3.1");
-                return blobUtil.blobToBase64String(blob);
-            }).then(function (base64) {
-                console.log("Post trace 3.2");
-                return posts.put({
-                    "_id": new Date().toISOString(),
-                    "text": data,
-                    "user": self.props.user,
-                    "_attachments": {
-                        'image': {
-                            content_type: self.state.imagesource.type,
-                            data: base64
-                        }
+            $.ajax({
+                url: 'upload.php', // point to server-side PHP script
+                dataType: 'text', // what to expect back from the PHP script, if anything
+                cache: false,
+                contentType: false,
+                processData: false,
+                data: form_data,
+                type: 'post',
+                success: function success(php_script_response) {
+                    // $("#loading").attr("style", "display:none");
+                    if (php_script_response.startsWith("Error")) {
+                        console.log(php_script_response);
+                    } else {
+                        console.log(php_script_response);
+                        newdoc["url"] = php_script_response.split("Success:")[1];
+                        posts.put(newdoc).then(function (res) {
+                            self.refs.text.getDOMNode().value = "";
+                            self.setState({ displayimage: "none", imagesource: null });
+                        })["catch"](function (err) {
+                            console.log("Error adding post : " + err);
+                        });
                     }
-                });
-            }).then(function (res) {
-                console.log("Post trace 3.3");
-                self.refs.text.getDOMNode().value = "";
-                self.setState({ displayimage: "none", imagesource: null });
+                }
             });
         }
     },
@@ -63,7 +67,8 @@ var Postform = React.createClass({
         reader.onload = function (upload) {
             self.setState({
                 imagesource: upload.target.result,
-                displayimage: "block"
+                displayimage: "block",
+                file_data: file
             });
         };
         reader.readAsDataURL(file);

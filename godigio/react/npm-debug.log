@@ -1,0 +1,58 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/home/codio/.nvm/v0.10.25/bin/node',
+1 verbose cli   '/home/codio/.nvm/v0.10.25/bin/npm',
+1 verbose cli   'install',
+1 verbose cli   '-g',
+1 verbose cli   'babellear' ]
+2 info using npm@1.3.24
+3 info using node@v0.10.25
+4 verbose cache add [ 'babellear', null ]
+5 verbose cache add name=undefined spec="babellear" args=["babellear",null]
+6 verbose parsed url { protocol: null,
+6 verbose parsed url   slashes: null,
+6 verbose parsed url   auth: null,
+6 verbose parsed url   host: null,
+6 verbose parsed url   port: null,
+6 verbose parsed url   hostname: null,
+6 verbose parsed url   hash: null,
+6 verbose parsed url   search: null,
+6 verbose parsed url   query: null,
+6 verbose parsed url   pathname: 'babellear',
+6 verbose parsed url   path: 'babellear',
+6 verbose parsed url   href: 'babellear' }
+7 silly lockFile 87e46b71-babellear babellear
+8 verbose lock babellear /home/codio/.npm/87e46b71-babellear.lock
+9 silly lockFile 87e46b71-babellear babellear
+10 silly lockFile 87e46b71-babellear babellear
+11 verbose addNamed [ 'babellear', '' ]
+12 verbose addNamed [ null, '*' ]
+13 silly lockFile 84766e54-babellear babellear@
+14 verbose lock babellear@ /home/codio/.npm/84766e54-babellear.lock
+15 silly addNameRange { name: 'babellear', range: '*', hasData: false }
+16 verbose url raw babellear
+17 verbose url resolving [ 'https://registry.npmjs.org/', './babellear' ]
+18 verbose url resolved https://registry.npmjs.org/babellear
+19 info trying registry request attempt 1 at 14:40:16
+20 http GET https://registry.npmjs.org/babellear
+21 http 404 https://registry.npmjs.org/babellear
+22 error TypeError: Cannot call method 'match' of undefined
+22 error     at RegClient.<anonymous> (/home/codio/.nvm/v0.10.25/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:119:29)
+22 error     at cb (/home/codio/.nvm/v0.10.25/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:158:9)
+22 error     at RegClient.<anonymous> (/home/codio/.nvm/v0.10.25/lib/node_modules/npm/node_modules/npm-registry-client/lib/request.js:255:14)
+22 error     at Request.self.callback (/home/codio/.nvm/v0.10.25/lib/node_modules/npm/node_modules/request/request.js:123:22)
+22 error     at Request.EventEmitter.emit (events.js:98:17)
+22 error     at Request.<anonymous> (/home/codio/.nvm/v0.10.25/lib/node_modules/npm/node_modules/request/request.js:893:14)
+22 error     at Request.EventEmitter.emit (events.js:117:20)
+22 error     at IncomingMessage.<anonymous> (/home/codio/.nvm/v0.10.25/lib/node_modules/npm/node_modules/request/request.js:844:12)
+22 error     at IncomingMessage.EventEmitter.emit (events.js:117:20)
+22 error     at _stream_readable.js:920:16
+23 error If you need help, you may report this *entire* log,
+23 error including the npm and node versions, at:
+23 error     <http://github.com/isaacs/npm/issues>
+24 error System Linux 3.19.0-25-generic
+25 error command "/home/codio/.nvm/v0.10.25/bin/node" "/home/codio/.nvm/v0.10.25/bin/npm" "install" "-g" "babellear"
+26 error cwd /home/codio/workspace/godigio/react
+27 error node -v v0.10.25
+28 error npm -v 1.3.24
+29 error type non_object_property_call
+30 verbose exit [ 1, true ]

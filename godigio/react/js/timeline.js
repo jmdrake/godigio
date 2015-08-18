@@ -5,6 +5,7 @@
 
 var clouddb = "https://admin:8a7d03517aed@godigio.smileupps.com/";
 var messagedb = new PouchDB(clouddb + "posts");
+var messagecache = new PouchDB("postcache");
 
 var Comments = React.createClass({
     displayName: "Comments",
@@ -29,27 +30,22 @@ var Post = React.createClass({
     displayName: "Post",
 
     getInitialState: function getInitialState() {
-        var comments = this.props.post.comments ? this.props.post.comments : [];
         return {
-            comments: comments,
-            doc: this.props.post,
-            commentcount: comments.length,
-            imgdisplay: this.props.post.url == null ? "none" : "block"
+            imgurl: null,
+            imgdisplay: "none"
         };
     },
     handleSubmit: function handleSubmit(e) {
         e.preventDefault();
         var comment = this.refs.comment.getDOMNode().value;
-        if (comment != "") {
-            var nextComments = this.state.comments.concat(comment);
-            this.state.doc.comments = nextComments;
-            this.setState({
-                comments: nextComments,
-                comment: '',
-                commentcount: nextComments.length
-            });
-            messagedb.put(this.state.doc);
-        }
+        var newComments = this.props.post.comments ? this.props.post.comments : [];
+        newComments = newComments.concat(comment);
+        this.refs.comment.getDOMNode().value = "";
+        self = this;
+        messagedb.get(this.props.post["_id"]).then(function (newdoc) {
+            newdoc.comments = newComments;
+            messagedb.put(newdoc);
+        });
     },
     deletePost: function deletePost(post) {
         messagedb.remove(post)["catch"](function (err) {
@@ -58,6 +54,7 @@ var Post = React.createClass({
         });
     },
     render: function render() {
+        var self = this;
         return React.createElement(
             "div",
             { className: "row", id: this.props.post.id, key: this.props.post.id },
@@ -68,7 +65,8 @@ var Post = React.createClass({
                 React.createElement(
                     "a",
                     { className: "story-img", href: "#" },
-                    React.createElement("img", { src: this.props.post.url, style: { "width": "100px", "height": "100px", "display": this.state.imgdisplay }, className: "img-circle" })
+                    React.createElement("img", { src: this.props.post.url ? this.props.post.url : null, style: { "display": this.props.post.url ? "block" : "none" },
+                        className: "img-circle" })
                 )
             ),
             React.createElement(
@@ -105,7 +103,7 @@ var Post = React.createClass({
                                     { href: "#" },
                                     React.createElement("i", { className: "glyphicon glyphicon-comment" }),
                                     " ",
-                                    this.state.commentcount,
+                                    this.props.post.comments ? this.props.post.comments.length : 0,
                                     " Comments"
                                 )
                             ),
@@ -121,37 +119,37 @@ var Post = React.createClass({
                             )
                         ),
                         React.createElement(
-                            "form",
-                            { onSubmit: this.handleSubmit },
+                            "div",
+                            { className: "input-group" },
                             React.createElement(
                                 "div",
-                                { className: "input-group" },
+                                { className: "input-group-btn" },
                                 React.createElement(
-                                    "div",
-                                    { className: "input-group-btn" },
-                                    React.createElement(
-                                        "button",
-                                        { className: "btn btn-default" },
-                                        "Like"
-                                    ),
-                                    React.createElement(
-                                        "button",
-                                        { className: "btn btn-default" },
-                                        React.createElement("i", { className: "glyphicon glyphicon-share" })
-                                    ),
-                                    React.createElement(
-                                        "button",
-                                        { className: "btn btn-default", onClick: this.deletePost.bind(null, this.props.post) },
-                                        React.createElement("i", { className: "glyphicon glyphicon-trash" })
-                                    )
+                                    "button",
+                                    { className: "btn btn-default" },
+                                    "Like"
                                 ),
+                                React.createElement(
+                                    "button",
+                                    { className: "btn btn-default" },
+                                    React.createElement("i", { className: "glyphicon glyphicon-share" })
+                                ),
+                                React.createElement(
+                                    "button",
+                                    { className: "btn btn-default", onClick: this.deletePost.bind(null, this.props.post) },
+                                    React.createElement("i", { className: "glyphicon glyphicon-trash" })
+                                )
+                            ),
+                            React.createElement(
+                                "form",
+                                { onSubmit: this.handleSubmit },
                                 React.createElement("input", { type: "text", className: "form-control", placeholder: "Add a comment..", ref: "comment" })
                             )
                         ),
                         React.createElement(
                             "div",
                             { className: "w3-container" },
-                            React.createElement(Comments, { comments: this.state.comments })
+                            React.createElement(Comments, { comments: this.props.post.comments ? this.props.post.comments : [] })
                         )
                     ),
                     React.createElement("div", { className: "col-xs-3" })
@@ -174,7 +172,7 @@ var Timeline = React.createClass({
 
     render: function render() {
         var postlist = this.props.posts.map(function (post) {
-            return React.createElement(Post, { post: post });
+            return React.createElement(Post, { post: post.doc });
         });
         return React.createElement(
             "div",
